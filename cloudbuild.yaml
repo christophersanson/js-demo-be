@@ -1,47 +1,47 @@
 steps:
 # Pull the previous image to --cache-from
-- id: 'pull previous image'
+- id: 'Pull previous image'
   name: 'gcr.io/cloud-builders/docker'
   args: ['pull', 'gcr.io/$PROJECT_ID/$_IMAGE_NAME:latest'] # _IMAGE_NAME is a custom substitution
 
 # Build the new image 
-- id: 'build image'
+- id: 'Build'
   name: 'gcr.io/cloud-builders/docker'
   args: [ 
     'build', 
     '--cache-from', 'gcr.io/$PROJECT_ID/$_IMAGE_NAME:latest', 
     '-t', 'gcr.io/$PROJECT_ID/$_IMAGE_NAME:latest',
-    '-t', 'gcr.io/$PROJECT_ID/$_IMAGE_NAME:$BUILD_ID', 
+    '-t', 'gcr.io/$PROJECT_ID/$_IMAGE_NAME:$SHORT_SHA', 
     '.' 
   ]
 
 # Push updated image
-- id: 'push image'
+- id: 'Push'
   name: 'gcr.io/cloud-builders/docker'
-  args: ["push", "gcr.io/$PROJECT_ID/$_IMAGE_NAME:$BUILD_ID"]
+  args: ['push', 'gcr.io/$PROJECT_ID/$_IMAGE_NAME:$SHORT_SHA']
 
 # Replace the image tag in the k8s Deployment
-- id: 'update manifest file'
+- id: 'Update manifest file'
   name: 'ubuntu'
   args: [ 
     'sed', '-i',
-    's|gcr.io/$PROJECT_ID/$_IMAGE_NAME:.*|gcr.io/$PROJECT_ID/$_IMAGE_NAME:$BUILD_ID|g', 
-    'k8s.yml'
+    's|gcr.io/$PROJECT_ID/$_IMAGE_NAME:.*|gcr.io/$PROJECT_ID/$_IMAGE_NAME:$SHORT_SHA|g', 
+    'k8s.yaml'
   ]
 
-# Commit k8s.yml change to the repo
-- id: 'commit update manifest to repo'
+# Commit k8s.yaml change to the repo
+- id: 'Git commit'
   name: 'gcr.io/cloud-builders/git'
   args: [
     '-c', 'user.email=""',
     '-c', 'user.name="GCB Worker"',
     'commit', '-a', '-m',
-    'Update k8s Deployment image to tag $BUILD_ID [ci skip]',
+    'Update k8s Deployment image to tag $SHORT_SHA [ci skip]',
     '-v'
   ]
 
 # Push change to GitHub repo using encrypted secret
-- id: 'git push change' 
+- id: 'Git push' 
   name: 'gcr.io/cloud-builders/git'
   entrypoint: 'bash'
   args: [
@@ -51,20 +51,22 @@ steps:
   secretEnv: ['GITHUB_TOKEN']
 
 # Apply change
-- id: 'kubectl apply updated manifest'
+- id: 'Kubectl apply'
   name: 'gcr.io/cloud-builders/kubectl'
-  args: ['apply', '-f', 'k8s.yml']
+  args: ['apply', '-f', 'k8s.yaml']
   env:
   - 'CLOUDSDK_COMPUTE_ZONE=us-east1-b'
   - 'CLOUDSDK_CONTAINER_CLUSTER=gcb-demo'
 
 # Check rollout status
-- id: 'check rollout status'
+- id: 'Check rollout status'
   name: 'gcr.io/cloud-builders/kubectl'
   args: ['rollout', 'status', 'deployment/js-demo-be']
   env:
   - 'CLOUDSDK_COMPUTE_ZONE=us-east1-b'
   - 'CLOUDSDK_CONTAINER_CLUSTER=gcb-demo'
+
+# todo: Submit PR
 
 # Associate image that was pushed to GCR with the build history UI
 images:
