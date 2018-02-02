@@ -55,18 +55,43 @@ steps:
   name: 'gcr.io/cloud-builders/kubectl'
   args: ['apply', '-f', 'k8s.yaml']
   env:
-  - 'CLOUDSDK_COMPUTE_ZONE=us-east1-b'
-  - 'CLOUDSDK_CONTAINER_CLUSTER=gcb-demo'
+  - 'CLOUDSDK_COMPUTE_ZONE=$_ZONE'
+  - 'CLOUDSDK_CONTAINER_CLUSTER=$_CLUSTER'
 
 # Check rollout status
 - id: 'Check rollout status'
   name: 'gcr.io/cloud-builders/kubectl'
   args: ['rollout', 'status', 'deployment/js-demo-be']
   env:
-  - 'CLOUDSDK_COMPUTE_ZONE=us-east1-b'
-  - 'CLOUDSDK_CONTAINER_CLUSTER=gcb-demo'
+  - 'CLOUDSDK_COMPUTE_ZONE=$_ZONE'
+  - 'CLOUDSDK_CONTAINER_CLUSTER=$_CLUSTER'
 
-# todo: Submit PR
+# Submit PR
+- id: 'Set hub credentials'
+  name: 'gcr.io/cloud-builders/git'
+  entrypoint: 'bash'
+  args:
+    - '-c'
+    - |
+      mkdir .config
+      touch .config/hub
+      cat <<EOF > .config/hub 
+      github.com: 
+      - user: christophersanson 
+        oauth_token: $$GITHUB_TOKEN 
+        protocol: https 
+      EOF
+  secretEnv: ['GITHUB_TOKEN']
+
+- id: 'Submit PR to prod repo'
+  name: 'eroadltd/ubuntu-git-hub'
+  entrypoint: 'bash'
+  args:
+    - '-c'
+    - |
+      git remote set-url origin https://$$GITHUB_TOKEN@github.com/christophersanson/js-demo-be-prod.git
+      hub pull-request -f -m 'Promote to Prod' -b master -h master
+  secretEnv: ['GITHUB_TOKEN']
 
 # Associate image that was pushed to GCR with the build history UI
 images:
