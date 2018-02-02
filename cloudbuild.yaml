@@ -36,7 +36,7 @@ steps:
     '-c', 'user.email=""',
     '-c', 'user.name="GCB Worker"',
     'commit', '-a', '-m',
-    'Update k8s Deployment image to tag $SHORT_SHA [ci skip]',
+    'Update k8s Deployment image to tag $SHORT_SHA',
     '-v'
   ]
 
@@ -70,7 +70,7 @@ steps:
 
 # Associate image that was pushed to GCR with the build history UI
 images:
-- 'gcr.io/$PROJECT_ID/$_IMAGE_NAME:$BUILD_ID'
+- 'gcr.io/$PROJECT_ID/$_IMAGE_NAME:$SHORT_SHA'
 
 # Encrypt Github token for push changes
 secrets:

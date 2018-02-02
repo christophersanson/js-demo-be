@@ -19,7 +19,7 @@ kind: Deployment
 metadata:
   name: js-demo-be
 spec:
-  replicas: 3
+  replicas: 1
   template:
     metadata:
       labels:
