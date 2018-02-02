@@ -89,8 +89,8 @@ steps:
   args:
     - '-c'
     - |
-      git remote set-url origin https://$$GITHUB_TOKEN@github.com/christophersanson/js-demo-be-prod.git
-      hub pull-request -f -m 'Promote to Prod' -b master -h master
+      git remote set-url origin https://$$GITHUB_TOKEN@github.com/christophersanson/js-demo-be.git
+      hub pull-request -f -m 'Promote to Prod' -b stable -h master
   secretEnv: ['GITHUB_TOKEN']
 
 # Associate image that was pushed to GCR with the build history UI
