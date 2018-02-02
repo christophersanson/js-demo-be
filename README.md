@@ -5,5 +5,9 @@ Adding a new git tag on master branch will trigger an automated GCB build that w
 * build your container
 * update the k8s manifest file
 * commit the update manifest back to the repo
-* deploy the updated manifest to your k8s cluster
-* submit a PR to the js-demo-be-prod repo with the updated manifest
+* deploy the updated manifest to your k8s qa cluster
+* submit a PR to the stable branch with the updated manifest
+
+## Deploy to Prod
+Merging PR to stable will trigger an automated GCB build that will:
+* deploy the updated manifest to your k8s prod cluster

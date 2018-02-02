@@ -83,7 +83,7 @@ steps:
       EOF
   secretEnv: ['GITHUB_TOKEN']
 
-- id: 'Submit PR to prod repo'
+- id: 'Submit PR to stable branch'
   name: 'eroadltd/ubuntu-git-hub'
   entrypoint: 'bash'
   args:
