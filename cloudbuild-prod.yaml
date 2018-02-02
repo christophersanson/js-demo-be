@@ -1,0 +1,16 @@
+steps:
+# Apply change
+- id: 'Kubectl apply'
+  name: 'gcr.io/cloud-builders/kubectl'
+  args: ['apply', '-f', 'k8s.yaml']
+  env:
+  - 'CLOUDSDK_COMPUTE_ZONE=$_ZONE'
+  - 'CLOUDSDK_CONTAINER_CLUSTER=$_CLUSTER'
+
+# Check rollout status
+- id: 'Check rollout status'
+  name: 'gcr.io/cloud-builders/kubectl'
+  args: ['rollout', 'status', 'deployment/js-demo-be']
+  env:
+  - 'CLOUDSDK_COMPUTE_ZONE=$_ZONE'
+  - 'CLOUDSDK_CONTAINER_CLUSTER=$_CLUSTER'
