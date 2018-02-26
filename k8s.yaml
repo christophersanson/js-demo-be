@@ -28,7 +28,7 @@ spec:
     spec:
       containers:
       - name: js-be
-        image: gcr.io/csanson-test/js-demo-be:ac78c18
+        image: gcr.io/csanson-test/js-demo-be:4f8bff2
         resources:
           requests:
             cpu: 100m
